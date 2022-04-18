@@ -21,7 +21,6 @@ static int dynarr_pushbackImpl(Dynarr *const dynarr, void *source);
 static size_t dynarr_sizeImpl(const Dynarr *const dynarr);
 static int dynarr_getImpl(const Dynarr *const dynarr, void *destination, unsigned int index);
 
-
 /******************************************************************************
 **              FUNCTION DEFINITIONS                                           
 ******************************************************************************/

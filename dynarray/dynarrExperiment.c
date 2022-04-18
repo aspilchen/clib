@@ -1,0 +1,35 @@
+#include <string.h>
+#include <stdlib.h>
+
+#include "dynarrExperiment.h"
+
+/******************************************************************************
+**              FUNCTION DEFINITIONS                                           
+******************************************************************************/
+void dynarr__init__(struct DynarrMeta *meta, void *data, size_t itemSize)
+{
+	meta->data = data;
+	*meta->data = malloc(itemSize);
+	meta->size = 0;
+	meta->itemSize = itemSize;
+	meta->capacity = 1;
+}
+
+void dynarr__pushBack__(struct DynarrMeta *meta)
+{
+	meta->size += 1;
+}
+
+void dynar__expandIfFull__(struct DynarrMeta *meta)
+{
+	if(meta->size < meta->capacity) {
+		return;
+	}
+
+	size_t newCapacity = meta->capacity * 2;
+	void* data = malloc(newCapacity * meta->itemSize);
+	memcpy(data, *meta->data, meta->size * meta->itemSize);
+	free(*meta->data);
+	*meta->data = data;
+	meta->capacity = newCapacity;
+}
