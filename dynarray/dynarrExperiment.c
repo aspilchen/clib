@@ -15,6 +15,14 @@ void dynarr__init__(struct DynarrMeta *meta, void *data, size_t itemSize)
 	meta->capacity = 1;
 }
 
+void dynarr__destroy__(struct DynarrMeta *meta)
+{
+	free(*(meta->data));
+	*(meta->data) = NULL;
+	meta->size = 0;
+	meta->capacity = 0;
+}
+
 void dynarr__pushBack__(struct DynarrMeta *meta)
 {
 	meta->size += 1;

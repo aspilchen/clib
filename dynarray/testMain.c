@@ -18,9 +18,12 @@ struct testStruct {
 	int b;
 }typedef strct;
 
+typedef strct *asdf;
+
 #ifndef DYNAR__testStruct__PTRS__
 #define DYNAR__testStruct__PTRS__
-dynarr_declarePointerArray(strct);
+dynarr_declareValueArray(strct);
+dynarr_declareValueArray(asdf);
 #endif
 
 
@@ -31,7 +34,7 @@ int main() {
 	Dynarr(char) charArr;
 	dynarr_init(&charArr);
 
-	DynarrPTRS(strct) test;
+	Dynarr(asdf) test;
 	dynarr_init(&test);
 
 	strct a = {0, 1};
@@ -41,6 +44,7 @@ int main() {
 	dynarr_pushBack(&test, &a);
 	dynarr_pushBack(&test, &b);
 	dynarr_pushBack(&test, &c);
+
 
 	strct *ptr;
 	for(int i = 0; i < 3; i++) {
@@ -54,12 +58,12 @@ int main() {
 	}
 
 	printf("printing from char array\n");
-	for(int i = 0; i < SIZE(&charArr); i++) {
+	for(int i = 0; i < arrsize(&charArr); i++) {
 		printf("%c\n", dynarr_get(&charArr, i));
 	}
 
 	printf("printing from int array\n");
-	for(int i = 0; i < SIZE(&intArr); i++) {
+	for(int i = 0; i < arrsize(&intArr); i++) {
 		printf("%d\n", dynarr_get(&intArr, i));
 	}
 }

@@ -1,10 +1,10 @@
 /** @file dynarrExperiment.h
  *  @brief Experimenting with macros to create a generic dynamic array.
  * 
- *  This is a big experiment to create easy to use generic dynamic arrays.
- *  Next step is to make this thread safe.
- * 
- *  @todo Make destructor.
+ *  This is an experiment to create easy to use generic dynamic arrays.
+ *  Currently must typedef any structs or pointers being used in this. I need
+ *  to do some adjustments so it doesnt get mad when declaring a struct or a pointer 
+ *  directly.
  * 
  *  @version 1.0
  *  @date 2022/04/18
@@ -21,20 +21,14 @@ struct DynarrMeta {
 	size_t capacity;
 };
 
+/******************************************************************************
+**              Interface
+******************************************************************************/
 
-void dynarr__init__(struct DynarrMeta *meta, void *data, size_t itemSize);
-void dynar__expandIfFull__(struct DynarrMeta *meta); 
-void dynarr__pushBack__(struct DynarrMeta *meta);
-
-#define DATA(PTR)     (PTR)->data
-#define META(PTR)     (PTR)->meta
-#define MDATA(PTR)    META(PTR).data
-#define SIZE(PTR)     META(PTR).size
-#define TYPESIZE(PTR) sizeof(*DATA(PTR))
-#define CAPACITY(PTR) META(PTR).capacity
+// Interface is done with macros, allowing the compiler to dynamically create new data types as needed.
 
 #define Dynarr(TYPE) dynarr__ ## TYPE ## __
-#define DynarrPTRS(TYPE) dynarr__ptrs ## TYPE ## __
+// #define DynarrPTRS(TYPE) dynarr__ptrs ## TYPE ## __
 
 /** @brief Declares a dynamic array type.
  *  @warning User must use include gaurds to prevent redifining types. Please use the format
@@ -43,18 +37,40 @@ void dynarr__pushBack__(struct DynarrMeta *meta);
  *  dynarr_declare(<type>)
  *  #endif
  */
-#define dynarr_declareValueArray(TYPE) struct Dynarr(TYPE) {struct DynarrMeta meta; TYPE *data;} typedef Dynarr(TYPE)
+#define dynarr_declare(TYPE) struct Dynarr(TYPE) {struct DynarrMeta meta; TYPE *data;} typedef Dynarr(TYPE)
 
-#define dynarr_declarePointerArray(TYPE) struct DynarrPTRS(TYPE) {struct DynarrMeta meta; TYPE **data;} typedef DynarrPTRS(TYPE)
+/** @brief Initialize dynamic array.
+ *  @arg PTR Pointer to dynamic array being initialized.
+ */
+#define dynarr_init(PTR) dynarr__init__(&arrmeta(PTR), &arrdata(PTR), arrtypesize(PTR))
 
-#define dynarr_init(PTR) dynarr__init__(&META(PTR), &DATA(PTR), TYPESIZE(PTR))
+#define dynarr_destroy(PTR) dynarr__destroy__(&arrmeta(PTR))
 
-#define dynarr_put(PTR, INDEX, VALUE) (DATA(PTR))[INDEX] = VALUE
+#define dynarr_put(PTR, INDEX, VALUE) (arrdata(PTR))[INDEX] = VALUE
 
-#define dynarr_get(PTR, INDEX) DATA(PTR)[INDEX]
+#define dynarr_get(PTR, INDEX) arrdata(PTR)[INDEX]
 
 #define dynarr_pushBack(PTR, VALUE) dynarr__push__back__(PTR, VALUE)
 
-#define dynarr__push__back__(PTR, VALUE) {dynar__expandIfFull__(&META(PTR)); dynarr_put(PTR, SIZE(PTR), VALUE); SIZE(PTR)++;}
+#define dynarr__push__back__(PTR, VALUE) {dynar__expandIfFull__(&arrmeta(PTR)); dynarr_put(PTR, arrsize(PTR), VALUE); arrsize(PTR)++;}
+
+
+/******************************************************************************
+**              Data Access Macros
+******************************************************************************/
+// Make these safe in the future by preventing users from changing data using them.
+
+#define arrdata(PTR)     (PTR)->data
+#define arrmeta(PTR)     (PTR)->meta
+#define arrmdata(PTR)    arrmeta(PTR).data
+#define arrsize(PTR)     arrmeta(PTR).size
+#define arrtypesize(PTR) sizeof(*arrdata(PTR))
+#define arrcapacity(PTR) arrmeta(PTR).capacity
+
+
+void dynarr__init__(struct DynarrMeta *meta, void *data, size_t itemSize);
+void dynarr__destroy__(struct DynarrMeta *meta);
+void dynar__expandIfFull__(struct DynarrMeta *meta); 
+void dynarr__pushBack__(struct DynarrMeta *meta);
 
 #endif
